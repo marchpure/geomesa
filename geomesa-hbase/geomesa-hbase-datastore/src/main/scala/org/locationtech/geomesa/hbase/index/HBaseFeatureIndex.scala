@@ -75,9 +75,9 @@ trait HBaseFeatureIndex extends HBaseFeatureIndexType with ClientSideFiltering[R
         logger.debug(s"Creating table $name")
 
         val conf = admin.getConfiguration
-        val compression = sft.userData[String](Configs.COMPRESSION_ENABLED).filter(_.toBoolean).map { _ =>
+        val compression = sft.userData[String](Configs.COMPRESSION_ENABLED).filter(!_.equals("false")).map { _ =>
           // note: all compression types in HBase are case-sensitive and lower-cased
-          val compressionType = sft.userData[String](Configs.COMPRESSION_TYPE).getOrElse("gz").toLowerCase(Locale.US)
+          val compressionType = sft.userData[String](Configs.COMPRESSION_TYPE).getOrElse("snappy").toLowerCase(Locale.US)
           logger.debug(s"Setting compression '$compressionType' on table $name for feature ${sft.getTypeName}")
           Compression.getCompressionAlgorithmByName(compressionType)
         }
