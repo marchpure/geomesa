@@ -19,6 +19,7 @@ import org.apache.hadoop.hbase.coprocessor.CoprocessorHost
 import org.apache.hadoop.hbase.filter.KeyOnlyFilter
 import org.apache.hadoop.hbase.io.compress.Compression
 import org.apache.hadoop.hbase.io.encoding.DataBlockEncoding
+import org.apache.hadoop.hbase.regionserver.BloomType
 import org.locationtech.geomesa.hbase._
 import org.locationtech.geomesa.hbase.coprocessor.AllCoprocessors
 import org.locationtech.geomesa.hbase.data._
@@ -63,6 +64,8 @@ trait HBaseFeatureIndex extends HBaseFeatureIndexType with ClientSideFiltering[R
 
   protected val dataBlockEncoding: Option[DataBlockEncoding] = Some(DataBlockEncoding.FAST_DIFF)
 
+  protected val bloomFilterType: Option[BloomType] = Some(BloomType.NONE)
+
   override def configure(sft: SimpleFeatureType, ds: HBaseDataStore, partition: Option[String]): String = {
     import HBaseFeatureIndex.DistributedJarNamePattern
     import HBaseSystemProperties.CoprocessorPath
@@ -87,6 +90,7 @@ trait HBaseFeatureIndex extends HBaseFeatureIndexType with ClientSideFiltering[R
         HBaseColumnGroups(sft).foreach { case (group, _) =>
           val column = new HColumnDescriptor(group)
           compression.foreach(column.setCompressionType)
+          bloomFilterType.foreach(column.setBloomFilterType)
           HBaseVersions.addFamily(descriptor, column)
           dataBlockEncoding.foreach(column.setDataBlockEncoding)
         }
