@@ -24,8 +24,9 @@ import org.locationtech.geomesa.hbase.coprocessor.AllCoprocessors
 import org.locationtech.geomesa.hbase.data._
 import org.locationtech.geomesa.hbase.index.legacy._
 import org.locationtech.geomesa.hbase.utils.HBaseVersions
+import org.locationtech.geomesa.index.api.GeoMesaFeatureIndex
 import org.locationtech.geomesa.index.conf.partition.TablePartition
-import org.locationtech.geomesa.index.index.ClientSideFiltering
+import org.locationtech.geomesa.index.index.{BaseFeatureIndex, ClientSideFiltering}
 import org.locationtech.geomesa.utils.geotools.SimpleFeatureTypes.Configs
 import org.locationtech.geomesa.utils.index.IndexMode
 import org.locationtech.geomesa.utils.index.IndexMode.IndexMode
@@ -44,7 +45,7 @@ object HBaseFeatureIndex extends HBaseIndexManagerType {
       HBaseAttributeIndex, HBaseAttributeIndexV4, HBaseAttributeIndexV3, HBaseAttributeIndexV2, HBaseAttributeIndexV1)
 
   override val CurrentIndices: Seq[HBaseFeatureIndex] =
-    Seq(HBaseZ3Index, HBaseXZ3Index, HBaseZ2Index, HBaseXZ2Index, HBaseIdIndex, HBaseAttributeIndex)
+    Seq(HBaseZ3Index, HBaseXZ3Index, HBaseXZ2Index, HBaseAttributeIndex)
 
   override def indices(sft: SimpleFeatureType,
                        idx: Option[String] = None,
