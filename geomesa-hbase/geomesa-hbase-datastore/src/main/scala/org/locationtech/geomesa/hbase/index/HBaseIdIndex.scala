@@ -18,6 +18,6 @@ case object HBaseIdIndex extends HBaseIdLikeIndex with HBasePlatform
 
 trait HBaseIdLikeIndex extends HBaseFeatureIndex with HBaseIndexAdapter
     with IdIndex[HBaseDataStore, HBaseFeature, Mutation, Scan, ScanConfig] {
-  override protected val dataBlockEncoding: Option[DataBlockEncoding] = None
+  override protected val dataBlockEncoding: Option[DataBlockEncoding] = Some(DataBlockEncoding.FAST_DIFF)
   override val version: Int = 1
 }
