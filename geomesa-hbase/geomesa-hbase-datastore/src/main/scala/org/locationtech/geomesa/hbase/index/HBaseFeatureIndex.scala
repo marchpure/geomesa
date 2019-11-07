@@ -64,6 +64,8 @@ trait HBaseFeatureIndex extends HBaseFeatureIndexType with ClientSideFiltering[R
 
   protected val dataBlockEncoding: Option[DataBlockEncoding] = Some(DataBlockEncoding.FAST_DIFF)
 
+  protected val compressionType: Option[Compression.Algorithm] = Some(Compression.Algorithm.SNAPPY)
+
   protected val bloomFilterType: Option[BloomType] = Some(BloomType.NONE)
 
   override def configure(sft: SimpleFeatureType, ds: HBaseDataStore, partition: Option[String]): String = {
@@ -79,20 +81,15 @@ trait HBaseFeatureIndex extends HBaseFeatureIndexType with ClientSideFiltering[R
         logger.debug(s"Creating table $name")
 
         val conf = admin.getConfiguration
-        val compression = sft.userData[String](Configs.COMPRESSION_ENABLED).filter(!_.equals("false")).map { _ =>
-          // note: all compression types in HBase are case-sensitive and lower-cased
-          val compressionType = sft.userData[String](Configs.COMPRESSION_TYPE).getOrElse("snappy").toLowerCase(Locale.US)
-          logger.debug(s"Setting compression '$compressionType' on table $name for feature ${sft.getTypeName}")
-          Compression.getCompressionAlgorithmByName(compressionType)
-        }
+        val x = sft.userData[String](Configs.COMPRESSION_ENABLED)
 
         val descriptor = new HTableDescriptor(name)
         HBaseColumnGroups(sft).foreach { case (group, _) =>
           val column = new HColumnDescriptor(group)
-          compression.foreach(column.setCompressionType)
+          compressionType.foreach(column.setCompressionType)
           bloomFilterType.foreach(column.setBloomFilterType)
-          HBaseVersions.addFamily(descriptor, column)
           dataBlockEncoding.foreach(column.setDataBlockEncoding)
+          HBaseVersions.addFamily(descriptor, column)
         }
 
         if (ds.config.remoteFilter) {
